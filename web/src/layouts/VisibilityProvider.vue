@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, provide, ref } from "vue";
+import { onMounted, onUnmounted } from "vue";
 import { useNuiEvent } from "../composables/useNuiEvent";
 import { isEnvBrowser } from "../utils/misc";
 import { fetchNui } from "../utils/fetchNui";
+import { useStore } from "../stores";
 
-const visible = ref(false);
-const setVisible = (val: boolean) => (visible.value = val);
+const store = useStore();
 
-useNuiEvent("setVisible", setVisible);
+useNuiEvent("setVisible", store.setVisible);
 
 const keyHandler = (event: KeyboardEvent) => {
   if (["Backspace", "Escape"].includes(event.code)) {
     if (!isEnvBrowser()) {
       fetchNui("hideFrame");
     } else {
-      visible.value = !visible.value;
+      store.setVisible(false);
     }
   }
 };
@@ -26,12 +26,10 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener("keydown", keyHandler);
 });
-
-provide("setVisible", setVisible);
 </script>
 
 <template>
-  <div :style="{ visibility: visible ? 'visible' : 'hidden', height: '100%' }">
+  <div :style="{ visibility: store.visible ? 'visible' : 'hidden', height: '100%' }">
     <slot></slot>
   </div>
 </template>
